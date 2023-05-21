@@ -1,6 +1,6 @@
-use crate::chunk::{Chunk, OpCode};
-use crate::logging::log;
-use crate::value::Value;
+use crate::compiler::{Chunk, OpCode};
+use crate::compiler::Value;
+use crate::logging;
 
 #[allow(dead_code)]
 pub enum InterpretResult {
@@ -27,8 +27,8 @@ impl VM {
 
         while self.instruction_index < chunk.code_nb() {
             let instruction = chunk.get_instruction(self.instruction_index);
-            log::log_stack(&self.stack);
-            log::log_instruction(&chunk, &instruction, self.instruction_index);
+            logging::log_stack(&self.stack);
+            logging::log_instruction(&chunk, &instruction, self.instruction_index);
             self.instruction_index += 1;
             match instruction {
                 Return => {
@@ -49,8 +49,8 @@ impl VM {
                 }
             }
         }
-        log::log_stack(&self.stack);
-        return InterpretResult::Ok;
+        logging::log_stack(&self.stack);
+        InterpretResult::Ok
     }
 
     fn pop_value(&mut self) -> Value {
@@ -75,5 +75,43 @@ impl VM {
             _ => unreachable!(),
         };
         Value::Number(result)
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn unary_negate() {
+        let mut vm = VM::new();
+        let mut chunk = Chunk::new();
+
+        let num = 20.0;
+
+        let constant = chunk.add_constants(Value::Number(num));
+        chunk.write_opcode(OpCode::Constant(constant), 0);
+        chunk.write_opcode(OpCode::Negate, 0);
+        vm.interpret(chunk);
+
+        assert_eq!(vm.pop_value(), Value::Number(-num));
+    }
+
+    #[test]
+    fn binary_add() {
+        let mut vm = VM::new();
+        let mut chunk = Chunk::new();
+
+        let lhs = 10.0;
+        let rhs = 20.0;
+
+        let constant = chunk.add_constants(Value::Number(lhs));
+        chunk.write_opcode(OpCode::Constant(constant), 0);
+        let constant = chunk.add_constants(Value::Number(rhs));
+        chunk.write_opcode(OpCode::Constant(constant), 0);
+        chunk.write_opcode(OpCode::Add, 0);
+
+        vm.interpret(chunk);
+        assert_eq!(vm.pop_value(), Value::Number(lhs + rhs));
     }
 }

@@ -1,1 +1,4 @@
-/target
+target
+.vscode
+test_file.rs
+Cargo.lock

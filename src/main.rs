@@ -1,23 +1,39 @@
-mod chunk;
+mod compiler;
+mod interpreter;
 mod logging;
-mod value;
-mod virtual_machine;
+mod scanner;
 
-use chunk::{Chunk, OpCode};
 use std::env;
-use value::Value;
-use virtual_machine::VM;
+use std::fs::File;
+use std::io::Read;
+use std::path::Path;
 
-fn main() {
-    let _args: Vec<String> = env::args().collect();
-    let mut vm = VM::new();
-    let mut chunk = Chunk::new();
-    let constant = chunk.add_constants(Value::Number(1.2));
-    chunk.write_opcode(OpCode::Constant(constant), 0);
-    let constant = chunk.add_constants(Value::Number(42.0));
-    chunk.write_opcode(OpCode::Constant(constant), 0);
-    chunk.write_opcode(OpCode::Negate, 1);
-    chunk.write_opcode(OpCode::Add, 1);
-    chunk.write_opcode(OpCode::Return, 1);
-    vm.interpret(chunk);
+use scanner::Scanner;
+
+fn run_repl() -> Result<(), Box<dyn std::error::Error>> {
+    Ok(())
+}
+fn run_file(mut file: File) -> Result<(), Box<dyn std::error::Error>> {
+    let mut source = String::new();
+    file.read_to_string(&mut source)?;
+    let scanner = Scanner::new(source);
+    scanner.tokenize();
+    Ok(())
+}
+
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let args: Vec<String> = env::args().collect();
+    match args.len() {
+        1 => run_repl(),
+        2 => {
+            let path = Path::new(args[1].as_str());
+            let file = File::open(path)?;
+            run_file(file)
+        }
+        _ => Ok(println!(
+            "Usage:
+           - script mode: clox [file path]
+           - repl mode: clox"
+        )),
+    }
 }

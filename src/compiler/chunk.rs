@@ -1,4 +1,5 @@
-use crate::value::Value;
+use super::value::Value;
+
 #[allow(dead_code)]
 #[derive(Clone, Copy)]
 pub enum OpCode {
@@ -50,13 +51,15 @@ impl Chunk {
     }
 
     pub fn get_instruction(&self, index: usize) -> OpCode {
-        *self.code()
+        *self
+            .code()
             .get(index)
             .expect("Expected a correct index of instruction code")
     }
 
     pub fn get_constant(&self, index: usize) -> Value {
-        *self.constants
+        *self
+            .constants
             .get(index)
             .expect("Expected a correct index of instruction code")
     }

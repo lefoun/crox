@@ -1,14 +1,15 @@
-use crate::{value::Value, Chunk, OpCode};
+use crate::compiler::{Chunk, OpCode, Value};
+pub use log::*;
 
 // created this log to be able to specify #[allow(dead_code)] on the entire file
 #[allow(dead_code)]
 pub mod log {
     use super::*;
     #[cfg(not(feature = "logging"))]
-    pub fn log_stack(_stack: &Vec<Value>) {}
+    pub fn log_stack(_stack: &[Value]) {}
 
     #[cfg(feature = "logging")]
-    pub fn log_stack(stack: &Vec<Value>) {
+    pub fn log_stack(stack: &[Value]) {
         print!("-- stack log:         ");
         for v in stack.iter().rev() {
             print!("[ {v} ]");
