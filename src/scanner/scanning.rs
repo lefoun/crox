@@ -166,3 +166,140 @@ impl<'a> Scanner {
         }
     }
 }
+
+#[cfg(test)]
+mod tokenizer_tests {
+    use super::*;
+
+    #[test]
+    fn tokenize_let_stmt() {
+        let source = String::from("let x = 5 + 3;");
+        let scanner = Scanner::new(source);
+        let tokens = scanner.tokenize();
+
+        let expected_tokens = vec![
+            Token::new(TokenType::Let, "let", 0),
+            Token::new(TokenType::Identifier, "x", 0),
+            Token::new(TokenType::Equal, "=", 0),
+            Token::new(TokenType::Number(5.0), "5", 0),
+            Token::new(TokenType::Plus, "+", 0),
+            Token::new(TokenType::Number(3.0), "3", 0),
+            Token::new(TokenType::SemiColon, ";", 0),
+            Token::new(TokenType::Eof, "", 0),
+        ];
+
+        assert_eq!(tokens, expected_tokens);
+    }
+
+    #[test]
+    fn tokenize_single_character_tokens() {
+        let source = String::from("!^,.=><%/*+-{[(}]):;");
+        let scanner = Scanner::new(source);
+        let tokens = scanner.tokenize();
+
+        let expected_tokens = vec![
+            Token::new(TokenType::Bang, "!", 0),
+            Token::new(TokenType::Carrot, "^", 0),
+            Token::new(TokenType::Comma, ",", 0),
+            Token::new(TokenType::Dot, ".", 0),
+            Token::new(TokenType::Equal, "=", 0),
+            Token::new(TokenType::Greater, ">", 0),
+            Token::new(TokenType::Less, "<", 0),
+            Token::new(TokenType::Percent, "%", 0),
+            Token::new(TokenType::Slash, "/", 0),
+            Token::new(TokenType::Star, "*", 0),
+            Token::new(TokenType::Plus, "+", 0),
+            Token::new(TokenType::Minus, "-", 0),
+            Token::new(TokenType::LeftBrace, "{", 0),
+            Token::new(TokenType::LeftBracket, "[", 0),
+            Token::new(TokenType::LeftParen, "(", 0),
+            Token::new(TokenType::RightBrace, "}", 0),
+            Token::new(TokenType::RightBracket, "]", 0),
+            Token::new(TokenType::RightParen, ")", 0),
+            Token::new(TokenType::Colon, ":", 0),
+            Token::new(TokenType::SemiColon, ";", 0),
+            Token::new(TokenType::Eof, "", 0),
+        ];
+
+        assert_eq!(tokens, expected_tokens);
+    }
+
+    #[test]
+    fn tokenize_multi_character_tokens() {
+        let source = String::from("==>=<=!=");
+        let scanner = Scanner::new(source);
+        let tokens = scanner.tokenize();
+
+        let expected_tokens = vec![
+            Token::new(TokenType::DoubleEq, "==", 0),
+            Token::new(TokenType::GreaterEq, ">=", 0),
+            Token::new(TokenType::LessEq, "<=", 0),
+            Token::new(TokenType::BangEq, "!=", 0),
+            Token::new(TokenType::Eof, "", 0),
+        ];
+
+        assert_eq!(tokens, expected_tokens);
+    }
+
+    #[test]
+    fn tokenize_numbers() {
+        let source = String::from("42 3.14 0.1");
+        let scanner = Scanner::new(source);
+        let tokens = scanner.tokenize();
+
+        let expected_tokens = vec![
+            Token::new(TokenType::Number(42.0), "42", 0),
+            Token::new(TokenType::Number(3.14), "3.14", 0),
+            Token::new(TokenType::Number(0.1), "0.1", 0),
+            Token::new(TokenType::Eof, "", 0),
+        ];
+
+        assert_eq!(tokens, expected_tokens);
+    }
+
+    #[test]
+    fn tokenize_identifiers() {
+        let source = String::from("let foo _bar");
+        let scanner = Scanner::new(source);
+        let tokens = scanner.tokenize();
+
+        let expected_tokens = vec![
+            Token::new(TokenType::Let, "let", 0),
+            Token::new(TokenType::Identifier, "foo", 0),
+            Token::new(TokenType::Identifier, "_bar", 0),
+            Token::new(TokenType::Eof, "", 0),
+        ];
+
+        assert_eq!(tokens, expected_tokens);
+    }
+
+    #[test]
+    fn tokenize_strings() {
+        let source = String::from("\"Hello, world!\"");
+        let scanner = Scanner::new(source);
+        let tokens = scanner.tokenize();
+
+        let expected_tokens = vec![
+            Token::new(TokenType::CroxStr, "Hello, world!", 0),
+            Token::new(TokenType::Eof, "", 0),
+        ];
+
+        assert_eq!(tokens, expected_tokens);
+    }
+
+    #[test]
+    fn tokenize_error() {
+        let source = String::from("@#&");
+        let scanner = Scanner::new(source);
+        let tokens = scanner.tokenize();
+
+        let expected_tokens = vec![
+            Token::new(TokenType::Error("Unrecognized character"), "@", 0),
+            Token::new(TokenType::Error("Unrecognized character"), "#", 0),
+            Token::new(TokenType::Error("Unrecognized character"), "&", 0),
+            Token::new(TokenType::Eof, "", 0),
+        ];
+
+        assert_eq!(tokens, expected_tokens);
+    }
+}

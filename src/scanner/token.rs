@@ -1,4 +1,4 @@
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum TokenType {
     // One character tokens,
     Bang,
@@ -54,7 +54,7 @@ pub enum TokenType {
     Error(&'static str),
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Token<'a> {
     ty: TokenType,
     lexeme: &'a str,
